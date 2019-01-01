@@ -1,0 +1,87 @@
+﻿
+@model dynamic
+
+@{
+    /**/
+
+    ViewBag.Title = "Products";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<meta http-equiv="Refresh" content="100">
+<h3>Your Balance: @Math.Round(@Model.Balance,2)</h3>
+<h2>Products</h2>
+<table id="Products" class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Price</th>
+            <th>FreeAmount</th>
+            <th>OwnedAmount</th>
+            <th></th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in Model.products)
+        {
+            <tr>
+                <td>@product.Name</td>
+                <td>@Math.Round((@product.InitPrice / @product.FreeAmount), 2)</td>
+                <td>@product.FreeAmount</td>
+                <td>@product.OwnedAmount</td>
+                <td>
+                    @if (@product.FreeAmount > 0)
+                    {
+                        <button DataProductCode="@product.Code" class="btn-primary js-buy">Buy</button>
+                    }
+                    else
+                    {
+                        <p> No free units </p>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section scripts
+{
+    <script>
+
+        $(document).ready(function () {
+
+            $("#Products .js-buy").on("click", function () {
+
+                var button = $(this);
+
+                bootbox.confirm("Do you want to buy this product?", function (result) {
+
+                    if (result) {
+
+                        $.ajax({
+
+                            url: "/api/Products/" + button.attr("DataProductCode"),
+                            method: "put",
+                            data: {
+                                ProductCode: button.attr("DataProductCode"),
+                                Operation: "Buy"
+                            },
+                            success: function () {
+                                window.location.reload();
+                            },
+                            error: function (request, status, error) {
+                                bootbox.alert(request.responseText);
+                            }
+                        });
+                    }
+
+                });
+
+
+
+            });
+
+        });
+
+    </script>
+}

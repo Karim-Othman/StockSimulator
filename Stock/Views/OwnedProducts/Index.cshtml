@@ -1,0 +1,80 @@
+﻿
+@model dynamic
+
+@{
+    /**/
+
+    ViewBag.Title = "OwnedProducts";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{var productsList = Model.products;}
+@if (@productsList.Count > 0)
+{   <h3>Your Balance: @Math.Round(@Model.Balance, 2)</h3>
+    <h2>Owned Products</h2>
+    <table id="OwnedProducts" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var product in Model.products)
+            {
+                <tr>
+                    <td>@product.OwnedProductName</td>
+
+                    <td>
+                        <button DataProductCode="@product.OwnedProductCode" class="btn-danger js-sell">Sell</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <h>you don't have products</h>
+}
+
+@section scripts
+{
+    <script>
+
+        $(document).ready(function () {
+            $("#OwnedProducts .js-sell").on("click", function () {
+
+                var button = $(this);
+
+                bootbox.confirm("Do you want to sell this product?", function (result) {
+
+                    if (result) {
+
+                        $.ajax({
+
+                            url: "/api/Products/" + button.attr("DataProductCode"),
+                            method: "put",
+                            data: {
+                                ProductCode: button.attr("DataProductCode"),
+                                Operation: "Sell"
+                            },
+                            success: function () {
+                                window.location.reload();
+                            },
+                            error: function (request, status, error) {
+                                bootbox.alert(request.responseText);
+                            }
+                        });
+                    }
+
+                });
+
+
+
+            });
+
+        });
+
+    </script>
+}
